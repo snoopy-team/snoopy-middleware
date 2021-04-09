@@ -17,27 +17,27 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // -------- Socket code --------
+const PORT = 3000;
 let net = require('net');
 const io = require('socket.io')(server, {
   cors: {
-    origin: "http://127.0.0.1:5500",
-    methods: ["GET", "POST"]
+    origin: '*',
   }
 });
 
 // WebSocket connection from web client
 io.on('connection', (socket) => {
-  console.log('a user connected');
+  console.log('Client Connected');
   const client = new net.Socket();
 
   client.connect(58901, '127.0.0.1', function() {
-    console.log('Connected');
-    client.write('ArrowUp, ');
+    console.log('Backend Connected');
+    client.write('ArrowUp, \nArrowDown,');
   });
 
   client.on('data', function(data) {
     console.log('Received: ' + data);
-    io.emit(data);
+    io.emit('example message', data);
   });
 
   client.on('close', function() {
@@ -51,6 +51,7 @@ io.on('connection', (socket) => {
   
   socket.on('disconnect', () => {
     console.log('Client disconnected');
+    client.destroy();
   });
 });
 // -------- End Socket code --------
@@ -71,6 +72,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-server.listen(3000, () => {
-  console.log('listening on localhost:3000');
+server.listen(PORT, () => {
+  console.log('listening on localhost:' + PORT);
 });
